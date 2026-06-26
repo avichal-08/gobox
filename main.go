@@ -50,6 +50,11 @@ func child() {
 
 	syscall.Sethostname([]byte("gobox-container"))
 
+	syscall.Chroot("./alpine-fs")
+	syscall.Chdir("/")
+
+	syscall.Mount("proc", "proc", "proc", 0, "")
+
 	cmdPath, err := exec.LookPath(os.Args[2])
 	if err != nil {
 		fmt.Println("Command not found:", err)
