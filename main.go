@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strconv"
 	"syscall"
 )
 
@@ -29,7 +31,7 @@ func run() {
 	fmt.Printf("Running %v as parent PID %d\n", os.Args[2:], os.Getpid())
 
 	cmd := exec.Command("/proc/self/exe", append([]string{"child"}, os.Args[2:]...)...)
-	
+
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -39,9 +41,30 @@ func run() {
 		Unshareflags: syscall.CLONE_NEWNS,
 	}
 
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Start(); err != nil {
 		fmt.Println("ERROR running child:", err)
 		os.Exit(1)
+	}
+
+	childPid := cmd.Process.Pid
+	cg(childPid)
+
+	if err := cmd.Wait(); err != nil {
+		fmt.Println("ERROR running child:", err)
+	}
+}
+
+func cg(pid int) {
+	cgroups := "/sys/fs/cgroup/"
+	goboxCgroup := filepath.Join(cgroups, "gobox")
+
+	os.Mkdir(goboxCgroup, 0755)
+
+	os.WriteFile(filepath.Join(goboxCgroup, "pids.max"), []byte("20"), 0700)
+
+	err := os.WriteFile(filepath.Join(goboxCgroup, "cgroup.procs"), []byte(strconv.Itoa(pid)), 0700)
+	if err != nil {
+		fmt.Println("Error assigning cgroup:", err)
 	}
 }
 
