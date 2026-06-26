@@ -50,12 +50,13 @@ func child() {
 
 	syscall.Sethostname([]byte("gobox-container"))
 
-	cmd := exec.Command(os.Args[2], os.Args[3:]...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmdPath, err := exec.LookPath(os.Args[2])
+	if err != nil {
+		fmt.Println("Command not found:", err)
+		os.Exit(1)
+	}
 
-	if err := cmd.Run(); err != nil {
+	if err := syscall.Exec(cmdPath, os.Args[2:], os.Environ()); err != nil {
 		fmt.Println("ERROR running user command:", err)
 		os.Exit(1)
 	}
