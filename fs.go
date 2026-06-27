@@ -7,6 +7,23 @@ import (
 	"syscall"
 )
 
+func setupOverlay() string {
+	lower := "./alpine-fs"
+	overlayBase := "./overlay-tmp" 
+	upper := filepath.Join(overlayBase, "upper")
+	work := filepath.Join(overlayBase, "work") 
+	merged := filepath.Join(overlayBase, "merged")
+	
+	must(os.MkdirAll(upper, 0755))
+	must(os.MkdirAll(work, 0755))
+	must(os.MkdirAll(merged, 0755))
+
+	opts := fmt.Sprintf("lowerdir=%s,upperdir=%s,workdir=%s", lower, upper, work)
+	must(syscall.Mount("overlay", merged, "overlay", 0, opts))
+
+	return merged
+}
+
 func ensureRootFS() {
 	if _, err := os.Stat(rootFS); os.IsNotExist(err) {
 		fmt.Printf("Root filesystem not found at %s!\n", rootFS)
@@ -29,7 +46,7 @@ func setupFilesystem() {
 
 	putoldInside := "/.pivot_root"
 	must(syscall.Unmount(putoldInside, syscall.MNT_DETACH))
-	must(os.RemoveAll(putoldInside))
+	must(os.RemoveAll(putoldInside)) 
 
 	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 }
