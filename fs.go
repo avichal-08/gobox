@@ -7,11 +7,32 @@ import (
 	"syscall"
 )
 
+func setupFilesystem() {
+	ensureRootFS()
+
+	mergedFS := setupOverlay()
+
+	must(syscall.Mount(mergedFS, mergedFS, "bind", syscall.MS_BIND|syscall.MS_REC, ""))
+
+	putold := filepath.Join(mergedFS, ".pivot_root")
+	must(os.MkdirAll(putold, 0700))
+
+	must(syscall.PivotRoot(mergedFS, putold))
+
+	must(syscall.Chdir("/"))
+
+	putoldInside := "/.pivot_root"
+	must(syscall.Unmount(putoldInside, syscall.MNT_DETACH))
+	must(os.RemoveAll(putoldInside))
+
+	must(syscall.Mount("proc", "proc", "proc", 0, ""))
+}
+
 func setupOverlay() string {
-	lower := "./alpine-fs"
+	lower := rootFS
 	overlayBase := "./overlay-tmp" 
 	upper := filepath.Join(overlayBase, "upper")
-	work := filepath.Join(overlayBase, "work") 
+	work := filepath.Join(overlayBase, "work")
 	merged := filepath.Join(overlayBase, "merged")
 	
 	must(os.MkdirAll(upper, 0755))
@@ -30,23 +51,4 @@ func ensureRootFS() {
 		fmt.Println("Please run: curl -o alpine.tar.gz https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/x86_64/alpine-minirootfs-3.19.1-x86_64.tar.gz && mkdir alpine-fs && tar -xzf alpine.tar.gz -C alpine-fs")
 		os.Exit(1)
 	}
-}
-
-func setupFilesystem() {
-	ensureRootFS()
-
-	must(syscall.Mount(rootFS, rootFS, "bind", syscall.MS_BIND|syscall.MS_REC, ""))
-
-	putold := filepath.Join(rootFS, ".pivot_root")
-	must(os.MkdirAll(putold, 0700))
-
-	must(syscall.PivotRoot(rootFS, putold))
-
-	must(syscall.Chdir("/"))
-
-	putoldInside := "/.pivot_root"
-	must(syscall.Unmount(putoldInside, syscall.MNT_DETACH))
-	must(os.RemoveAll(putoldInside)) 
-
-	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 }

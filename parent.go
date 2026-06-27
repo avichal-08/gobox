@@ -28,4 +28,7 @@ func run() {
 	if err := cmd.Wait(); err != nil {
 		fmt.Printf("Container exited with error: %v\n", err)
 	}
+
+	fmt.Println("Cleaning up container resources...")
+	os.RemoveAll("./overlay-tmp")
 }
