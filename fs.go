@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"syscall"
 )
 
@@ -16,9 +17,19 @@ func ensureRootFS() {
 
 func setupFilesystem() {
 	ensureRootFS()
-	
-	must(syscall.Chroot(rootFS))
+
+	must(syscall.Mount(rootFS, rootFS, "bind", syscall.MS_BIND|syscall.MS_REC, ""))
+
+	putold := filepath.Join(rootFS, ".pivot_root")
+	must(os.MkdirAll(putold, 0700))
+
+	must(syscall.PivotRoot(rootFS, putold))
+
 	must(syscall.Chdir("/"))
+
+	putoldInside := "/.pivot_root"
+	must(syscall.Unmount(putoldInside, syscall.MNT_DETACH))
+	must(os.RemoveAll(putoldInside))
 
 	must(syscall.Mount("proc", "proc", "proc", 0, ""))
 }
