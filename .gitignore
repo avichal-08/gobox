@@ -1,6 +1,6 @@
+# Build Binary
 gobox
 
-.vscode/
-
+# Local Alpine file-system
 alpine-fs
 alpine.tar.gz

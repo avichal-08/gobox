@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-// main simply acts as our CLI router
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: gobox [run|child] <command>")
