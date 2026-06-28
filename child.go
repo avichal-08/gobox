@@ -14,6 +14,10 @@ func child() {
 
 	setupFilesystem()
 
+	must(os.MkdirAll("/etc", 0755))
+	os.Remove("/etc/resolv.conf")
+	must(os.WriteFile("/etc/resolv.conf", []byte("nameserver 8.8.8.8\n"), 0644))
+
 	cmdPath, err := exec.LookPath(os.Args[2])
 	if err != nil {
 		fmt.Printf("Command not found: %s\n", os.Args[2])
