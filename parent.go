@@ -16,13 +16,11 @@ func run() {
 	cmd.Stderr = os.Stderr
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET,
+		Cloneflags:   syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS,
 		Unshareflags: syscall.CLONE_NEWNS,
 	}
 
 	must(cmd.Start())
-
-	setupNetwork(cmd.Process.Pid)
 	
 	fmt.Printf("Container process spawned (Host PID: %d)\n", cmd.Process.Pid)
 	setupCgroups(cmd.Process.Pid)
