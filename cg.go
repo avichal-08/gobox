@@ -15,5 +15,7 @@ func setupCgroups(pid int) {
 
 	must(os.WriteFile(filepath.Join(cgroupDir, "pids.max"), []byte(maxProcesses), 0700))
 
+	must(os.WriteFile(filepath.Join(cgroupDir, "memory.max"), []byte(maxMemory), 0700))
+
 	must(os.WriteFile(filepath.Join(cgroupDir, "cgroup.procs"), []byte(strconv.Itoa(pid)), 0700))
 }

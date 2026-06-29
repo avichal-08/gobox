@@ -5,4 +5,5 @@ const (
 	cgroupDir         = "/sys/fs/cgroup/gobox"
 	containerHostname = "gobox-container"
 	maxProcesses      = "20"
+	maxMemory      = "500M"
 )
