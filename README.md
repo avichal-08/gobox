@@ -2,6 +2,12 @@
 
 A daemonless container runtime built from scratch in Go. GoBox demystifies how tools like Docker work under the hood by directly interacting with Linux kernel primitives.
 
+
+
+https://github.com/user-attachments/assets/d832973f-3be2-4c70-a3e2-c4e012cf9679
+
+
+
 ---
 
 ## Overview
